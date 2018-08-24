@@ -51,9 +51,10 @@ class AttParty extends Party {
 
 
         this._status = ObservableModule.fromObject({
-                status: States.UNDEFINED,
-                qrcode : undefined
-            });
+            status: States.UNDEFINED,
+            qrcode : undefined,
+
+        });
 
 
 
@@ -95,11 +96,12 @@ class AttParty extends Party {
         const fetchRequest = CothorityMessages.createFetchRequest(this._id, true);
         console.log("SKDEBUG ENTER");
 
+
+
         return cothoritySocket.send(RequestPath.POP_FETCH_REQUEST, DecodeType.FINALIZE_RESPONSE, fetchRequest)
             .then((response) => {
                 this._finalStatement = response.final;
-                console.log("FINAL STATEMENT")
-                console.log(this._finalStatement.desc.roster.list)
+
                 if(this._poptoken == undefined) {
                     if (Object.keys(response.final.attendees).length === 0) {
                         this._status.status = States.PUBLISHED;
@@ -115,20 +117,20 @@ class AttParty extends Party {
                 }
 
                 if(this._status.status !== States.POPTOKEN){
-                if(text !== " { \"public\" :  \"" + Convert.byteArrayToBase64(this.getKeyPair().public) + "\"}") {
-                    text = " { \"public\" :  \"" + Convert.byteArrayToBase64(this.getKeyPair().public) + "\"}";
-                    let sideLength = PlatformModule.screen.mainScreen.widthPixels / 4;
-                    const QR_CODE = QRGenerator.createBarcode({
-                        encode: text,
-                        format: ZXing.QR_CODE,
-                        height: sideLength,
-                        width: sideLength
-                    });
+                    if(text !== " { \"public\" :  \"" + Convert.byteArrayToBase64(this.getKeyPair().public) + "\"}") {
+                        text = " { \"public\" :  \"" + Convert.byteArrayToBase64(this.getKeyPair().public) + "\"}";
+                        let sideLength = PlatformModule.screen.mainScreen.widthPixels / 4;
+                        const QR_CODE = QRGenerator.createBarcode({
+                            encode: text,
+                            format: ZXing.QR_CODE,
+                            height: sideLength,
+                            width: sideLength
+                        });
 
 
-                    this._status.qrcode = ImageSource.fromNativeSource(QR_CODE);
+                        this._status.qrcode = ImageSource.fromNativeSource(QR_CODE);
 
-                }}
+                    }}
 
 
 
@@ -183,18 +185,25 @@ class AttParty extends Party {
     loadPopDesc() {
         const popDesc = this._finalStatement.desc;
         const popDescModule = this.getPopDescModule();
-        popDescModule.name = popDesc.name;
-        popDescModule.dateTime = popDesc.dateTime;
-        popDescModule.location = popDesc.location;
-        popDescModule.roster.id = Uint8Array.from(popDesc.roster.id);
 
-        popDescModule.roster.list.splice(0);
-        popDesc.roster.list.forEach(server => {
-            server.toHex = Convert.byteArrayToHex;
-            popDescModule.roster.list.push(server);
-        });
 
-        popDescModule.roster.aggregate = Uint8Array.from(popDesc.roster.aggregate);
+
+            popDescModule.name = popDesc.name;
+            popDescModule.dateTime = popDesc.dateTime;
+            popDescModule.location = popDesc.location;
+            popDescModule.roster.id = Uint8Array.from(popDesc.roster.id);
+
+            popDescModule.roster.list.splice(0);
+            if(popDescModule.roster.list.length ==0) {
+                popDesc.roster.list.forEach(server => {
+                    server.toHex = Convert.byteArrayToHex;
+
+                    popDescModule.roster.list.push(server);
+
+                });
+            }
+
+            popDescModule.roster.aggregate = Uint8Array.from(popDesc.roster.aggregate);
 
         return Promise.resolve();
     }
