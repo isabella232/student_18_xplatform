@@ -13,6 +13,8 @@ matrix:
     language: node_js
     node_js: '8'
     jdk: oraclejdk8
+    # LTS code name carbon => 8.x series. See https://github.com/nodejs/Release#lts_schedule
+    before_install: nvm install --lts=carbon
     script:
     - cd popcoin
     - make
@@ -54,8 +56,7 @@ cache:
   - "$HOME/.gradle/wrapper/"
   
 install:
-# nativescript@4.0.2 because of issue #35.
-- echo no | npm install -g nativescript@4.0.2
+- echo no | npm install -g nativescript@4.2.3
 - node --version
 - tns --version
 - tns usage-reporting disable
