@@ -1,7 +1,6 @@
 *.DS_Store
 .idea/
 .vscode/
-node_modules/
 ## Core latex/pdflatex auxiliary files:
 *.aux
 *.lof
